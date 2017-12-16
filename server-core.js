@@ -29,7 +29,7 @@ function queryCheck(from, to) {
     return () => true;
 }
 
-/** Выбираем фильтр по сообщениям
+/** Собираем сообщение
  * @param {string} from
  * @param {string} to
  * @param {string} text
@@ -63,22 +63,23 @@ server.on('request', (req, res) => {
     if (!isUrlCorrect(req.url)) {
         res.statusCode = 404;
         res.end();
-    }
-    if (req.method === 'GET') {
-        res.write(JSON.stringify(messages.filter(queryCheck(from, to))));
-        res.end();
-    }
-    if (req.method === 'POST') {
-        let text = '';
-        req.on('data', partOfText => {
-            text += partOfText;
-        });
-        req.on('end', () => {
-            let note = prepareMessageToSend(from, to, text);
-            messages.push(note);
-            res.write(JSON.stringify(note));
+    } else {
+        if (req.method === 'GET') {
+            res.write(JSON.stringify(messages.filter(queryCheck(from, to))));
             res.end();
-        });
+        }
+        if (req.method === 'POST') {
+            let text = '';
+            req.on('data', partOfText => {
+                text += partOfText;
+            });
+            req.on('end', () => {
+                let note = prepareMessageToSend(from, to, text);
+                messages.push(note);
+                res.write(JSON.stringify(note));
+                res.end();
+            });
+        }
     }
 });
 
