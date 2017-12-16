@@ -22,7 +22,8 @@ parser.addArgument('-v');
 
 const commands = {
     list: listFunc,
-    send: sendFunc
+    send: sendFunc,
+    delete: deleteFunc
 };
 
 /** Добавляем красивостей к сообщению
@@ -60,6 +61,22 @@ function listFunc(args) {
  * @returns {Promise}
  */
 function sendFunc(args) {
+    var options = {
+        uri: 'http://localhost:8080/messages//',
+        qs: { from: args.from, to: args.to },
+        method: 'POST',
+        json: { text: args.text }
+    };
+
+    return requestPromise(options)
+        .then(message => paintCommands(message), err => console.error(err));
+}
+
+/** Отправляем сообщение
+ * @param {Array} args
+ * @returns {Promise}
+ */
+function deleteFunc(args) {
     var options = {
         uri: 'http://localhost:8080/messages//',
         qs: { from: args.from, to: args.to },
