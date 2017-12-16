@@ -14,16 +14,13 @@ let messages = [];
  */
 function queryCheck(from, to) {
     if (from && to) {
-        return {
-            from: from,
-            to: to
-        };
+        return (note) => note.from === from && note.to === to;
     }
     if (from) {
-        return { from: from };
+        return (note) => note.from === from;
     }
     if (to) {
-        return { to: to };
+        return (note) => note.to === to;
     }
 
     return () => true;
@@ -48,37 +45,57 @@ function prepareMessageToSend(from, to, text) {
     return note;
 }
 
-/** Проверяем корректность url'а
- * @param {string} url
- * @returns {bool}
- */
-function isUrlCorrect(url) {
-    return (/^\/messages($|\?)/).test(url);
+function getFunc(res, from, to) {
+    res.write(JSON.stringify(messages.filter(queryCheck(from, to))));
+    res.end();
+}
+
+function postFunc(req, res, from, to) {
+    let text = '';
+    req.on('data', partOfText => {
+        text += partOfText;
+    });
+    req.on('end', () => {
+        let note = prepareMessageToSend(from, to, text);
+        messages.push(note);
+        res.write(JSON.stringify(note));
+        res.end();
+    });
+}
+
+function deleteFunc(req, res, from, to) {
+    let text = '';
+    req.on('data', partOfText => {
+        text += partOfText;
+    });
+    req.on('end', () => {
+        let note = prepareMessageToSend(from, to, text);
+        messages.push(note);
+        res.write(JSON.stringify(note));
+        res.end();
+    });
 }
 
 server.on('request', (req, res) => {
     let query = urlapi.parse(req.url).query;
     let { from, to } = queryapi.parse(query);
     res.setHeader('content-type', 'application/json');
-    if (!isUrlCorrect(req.url)) {
+    if ((/^\/messages($|\?)/).test(req.url)) {
         res.statusCode = 404;
         res.end();
     } else {
-        if (req.method === 'GET') {
-            res.write(JSON.stringify(messages.filter(queryCheck(from, to))));
-            res.end();
-        }
-        if (req.method === 'POST') {
-            let text = '';
-            req.on('data', partOfText => {
-                text += partOfText;
-            });
-            req.on('end', () => {
-                let note = prepareMessageToSend(from, to, text);
-                messages.push(note);
-                res.write(JSON.stringify(note));
-                res.end();
-            });
+        switch (req.method) {
+            case 'GET':
+                getFunc(res, from, to);
+                break;
+            case 'POST':
+                postFunc(req, res, from, to);
+                break;
+            case 'DELETE':
+                deleteFunc(req, res, from, to);
+                break;
+            default:
+                break;
         }
     }
 });
