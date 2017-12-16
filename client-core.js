@@ -1,11 +1,13 @@
 'use strict';
 
 module.exports.execute = execute;
-module.exports.isStar = true;
+module.exports.isStar = false;
 
 const requestPromise = require('request-promise');
 
 const chalk = require('chalk');
+const red = chalk.hex('#f00');
+const green = chalk.hex('#0f0');
 
 const ArgumentParser = require('argparse').ArgumentParser;
 const parser = new ArgumentParser();
@@ -28,16 +30,11 @@ const commands = {
  * @returns {Array}
  */
 function paintCommands(message) {
-    let result = '';
-    if (message.from) {
-        result += `${chalk.hex('#f00')('FROM')}: ${message.from}\n`;
-    }
-    if (message.to) {
-        result += `${chalk.hex('#f00')('TO')}: ${message.to}\n`;
-    }
-    result += `${chalk.hex('#0f0')('TEXT')}: ${message.text}`;
-
-    return result;
+    return [
+        message.from && `${red('FROM')}: ${message.from}`,
+        message.to && `${red('TO')}: ${message.to}`,
+        `${green('TEXT')}: ${message.text}`
+    ].filter(Boolean).join('\n');
 }
 
 /** Получаем список сообщений
@@ -85,7 +82,7 @@ function execute() {
     if (!args.from) {
         args.from = undefined;
     }
-    if (commands[args.command] !== undefined) {
+    if (args.command in commands) {
 
         return commands[args.command](args);
     }
