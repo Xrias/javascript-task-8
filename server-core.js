@@ -80,23 +80,18 @@ server.on('request', (req, res) => {
     let query = urlapi.parse(req.url).query;
     let { from, to } = queryapi.parse(query);
     res.setHeader('content-type', 'application/json');
-    if ((/^\/messages($|\?)/).test(req.url)) {
-        res.statusCode = 404;
-        res.end();
-    } else {
-        switch (req.method) {
-            case 'GET':
-                getFunc(res, from, to);
-                break;
-            case 'POST':
-                postFunc(req, res, from, to);
-                break;
-            case 'DELETE':
-                deleteFunc(req, res, from, to);
-                break;
-            default:
-                break;
-        }
+    switch (req.method) {
+        case 'GET':
+            getFunc(res, from, to);
+            break;
+        case 'POST':
+            postFunc(req, res, from, to);
+            break;
+        case 'DELETE':
+            deleteFunc(req, res, from, to);
+            break;
+        default:
+            break;
     }
 });
 
