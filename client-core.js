@@ -53,8 +53,9 @@ function listFunc(args) {
     };
 
     return requestPromise(options)
-        .then(messages => messages.map(message => paintCommands(message)))
-        .then(messages => messages.join('\n\n'));
+        .then(messages => messages.map(message => paintCommands(message)),
+            err => console.error(err))
+        .then(messages => messages.join('\n\n'), err => console.error(err));
 }
 
 /** Отправляем сообщение
@@ -70,7 +71,7 @@ function sendFunc(args) {
     };
 
     return requestPromise(options)
-        .then(message => paintCommands(message));
+        .then(message => paintCommands(message), err => console.error(err));
 }
 
 /**
