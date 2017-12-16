@@ -5,24 +5,19 @@ module.exports.isStar = true;
 
 const request = require('request');
 
-// Цвет
 const chalk = require('chalk');
-const red = chalk.hex('#f00');
-const green = chalk.hex('#0f0');
 
-// Парсим аргументы
 const ArgumentParser = require('argparse').ArgumentParser;
 const parser = new ArgumentParser();
 parser.addArgument('command', {
     choices: ['list', 'send', 'delete', 'edit']
 });
-parser.addArgument('--from'); // От кого
-parser.addArgument('--to'); // Кому
-parser.addArgument('--text'); // Текст сообщения
+parser.addArgument('--from');
+parser.addArgument('--to');
+parser.addArgument('--text');
 parser.addArgument('--id');
-parser.addArgument('-v'); // Режим подробного вывода
+parser.addArgument('-v');
 
-// Доступные команды
 const commands = {
     list: listFunc,
     send: sendFunc,
@@ -35,19 +30,24 @@ const commands = {
  * @returns {Array}
  */
 function paintCommands(message) {
-    return [
-        message.from && `${red('FROM')}: ${message.from}`,
-        message.to && `${red('TO')}: ${message.to}`,
-        `${green('TEXT')}: ${message.text}`
-    ].filter(Boolean).join('\n');
+    let result = '';
+    if (message.from) {
+        result += `${chalk.hex('#f00')('FROM')}: ${message.from}\n`;
+    }
+    if (message.to) {
+        result += `${chalk.hex('#f00')('TO')}: ${message.to}\n`;
+    }
+    result += `${chalk.hex('#0f0')('TEXT')}: ${message.text}`;
+
+    return result;
 }
 
 /** Создаем промис запроса
- * @param {Object} queryString
- * @param {string} method
- * @param {bool} json
- * @returns {Promise}
- */
+     * @param {Object} queryString
+     * @param {string} method
+     * @param {bool} json
+     * @returns {Promise}
+     */
 function requestPromise({ queryString = {}, method = 'GET', json = true }) {
     return new Promise((resolve, reject) => {
         request({ url: 'http://localhost:8080/messages//', queryString, method, json },
