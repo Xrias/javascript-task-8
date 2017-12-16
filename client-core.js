@@ -85,6 +85,10 @@ function execute() {
     if (!args.from) {
         args.from = undefined;
     }
+    if (commands[args.command] !== undefined) {
 
-    return commands[args.command](args);
+        return commands[args.command](args);
+    }
+
+    return Promise.reject('Supported only: list, send');
 }
