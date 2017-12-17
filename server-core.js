@@ -85,12 +85,15 @@ function PATCH(req, res, data) {
     });
     req.on('end', () => {
         let messageForEdit = messages.find(message => message.id === Number(data.id));
-        if (messageForEdit) {
+        if (messageForEdit && JSON.parse(text).text !== null) {
             messageForEdit.text = JSON.parse(text).text;
             messageForEdit.edited = true;
             let note = prepareMessageToSend(messageForEdit, text);
             note.id = Number(data.id);
             res.write(JSON.stringify(note));
+            res.end();
+        } else {
+            res.write(JSON.stringify({}));
             res.end();
         }
         res.statusCode = 404;
