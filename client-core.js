@@ -81,7 +81,7 @@ function sendFunc(args) {
         .then(message => paintCommands(message, args.v), err => console.error(err));
 }
 
-/** Удаляем сообщение (не доделано)
+/** Удаляем сообщение
  * @param {Array} args
  * @returns {Promise}
  */
@@ -96,7 +96,7 @@ function deleteFunc(args) {
         .then(() => 'DELETED', err => console.error(err));
 }
 
-/** Редактируем сообщение (не доделано)
+/** Редактируем сообщение
  * @param {Array} args
  * @returns {Promise}
  */
