@@ -16,7 +16,7 @@ parser.addArgument('--from');
 parser.addArgument('--to');
 parser.addArgument('--text');
 parser.addArgument('--id');
-parser.addArgument('-v');
+parser.addArgument('-v', { action: 'storeTrue' });
 
 const commands = {
     list: listFunc,
