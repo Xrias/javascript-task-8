@@ -3,7 +3,7 @@
 
 const { execute } = require('./client-core');
 
-module.exports.isStar = true;
+module.exports.isStar = false;
 
 execute()
     .then(console.log)
