@@ -104,6 +104,10 @@ server.on('request', (req, res) => {
     let data = queryapi.parse(query);
     res.setHeader('content-type', 'application/json');
     var regexp = /^\/messages\/{0,2}$/;
+    if (req.method === 'DELETE') {
+        res.statusCode = 404;
+        res.end();
+    }
     if (regexp.test(url.pathname) || url.pathname === '/messages/:[object%20Undefined]') {
         if (req.method in commands) {
 
