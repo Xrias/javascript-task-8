@@ -90,8 +90,10 @@ function patchFunc(req, res, data) {
                 message.edited = true;
                 let note = prepareMessageToSend(message, text);
                 res.write(JSON.stringify(note));
+                res.end();
             }
         }
+        res.statusCode = 404;
         res.end();
     });
 }
