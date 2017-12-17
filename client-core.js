@@ -93,7 +93,7 @@ function DELETE(args) {
     };
 
     return requestPromise(options)
-        .then(() => 'DELETE', err => console.error(err));
+        .then(() => 'DELETED', err => console.error(err));
 }
 
 /** Редактируем сообщение
@@ -109,7 +109,7 @@ function EDIT(args) {
     };
 
     return requestPromise(options)
-        .then(message => console.info(message, args.v), err => console.error(err));
+        .then(message => paintCommands(message, args.v), err => console.error(err));
 }
 
 /**
