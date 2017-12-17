@@ -85,7 +85,7 @@ function PATCH(req, res, data) {
     });
     req.on('end', () => {
         let messageForEdit = messages.find(message => message.id === Number(data.id));
-        if (messageForEdit) {
+        if (messageForEdit && text) {
             messageForEdit.text = JSON.parse(text).text;
             messageForEdit.edited = true;
             let note = prepareMessageToSend(messageForEdit, text);
@@ -104,10 +104,6 @@ server.on('request', (req, res) => {
     let data = queryapi.parse(query);
     res.setHeader('content-type', 'application/json');
     var regexp = /^\/messages\/{0,2}$/;
-    if (req.method === 'DELETE' || req.method === 'PATCH') {
-        res.statusCode = 404;
-        res.end();
-    }
     if (regexp.test(url.pathname) || url.pathname === '/messages/:[object%20Undefined]') {
         if (req.method in commands) {
 
