@@ -5,10 +5,10 @@ const server = http.createServer();
 const urlapi = require('url');
 const queryapi = require('querystring');
 const commands = {
-    GET: getFunc,
-    POST: postFunc,
-    DELETE: deleteFunc,
-    PATCH: patchFunc
+    GET: GET,
+    POST: POST,
+    DELETE: DELETE,
+    PATCH: PATCH
 };
 
 let messages = [];
@@ -54,12 +54,12 @@ function prepareMessageToSend(data, text) {
     return note;
 }
 
-function getFunc(req, res, data) {
+function GET(req, res, data) {
     res.write(JSON.stringify(messages.filter(queryCheck(data))));
     res.end();
 }
 
-function postFunc(req, res, data) {
+function POST(req, res, data) {
     let text = '';
     req.on('data', partOfText => {
         text += partOfText;
@@ -72,13 +72,13 @@ function postFunc(req, res, data) {
     });
 }
 
-function deleteFunc(req, res, data) {
+function DELETE(req, res, data) {
     messages = messages.filter(message => message.id !== Number(data.id));
     res.write(JSON.stringify({ 'status': 'ok' }));
     res.end();
 }
 
-function patchFunc(req, res, data) {
+function PATCH(req, res, data) {
     let text = '';
     req.on('data', partOfText => {
         text += partOfText;
@@ -103,8 +103,8 @@ server.on('request', (req, res) => {
     let query = urlapi.parse(req.url).query;
     let data = queryapi.parse(query);
     res.setHeader('content-type', 'application/json');
-    if (url.pathname === '/messages' || url.pathname === '/messages/' ||
-        url.pathname === '/messages//' || url.pathname === '/messages/:[object%20Undefined]') {
+    var regexp = /^\/messages/;
+    if (url.pathname.search(regexp) !== -1 || url.pathname === '/messages/:[object%20Undefined]') {
         if (req.method in commands) {
 
             return commands[req.method](req, res, data);
