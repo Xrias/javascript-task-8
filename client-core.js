@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports.execute = execute;
-module.exports.isStar = true;
+module.exports.isStar = false;
 
 const requestPromise = require('request-promise');
 
@@ -19,10 +19,10 @@ parser.addArgument('--id');
 parser.addArgument('-v', { action: 'storeTrue' });
 
 const commands = {
-    list: listFunc,
-    send: sendFunc,
-    delete: deleteFunc,
-    edit: editFunc
+    list: LIST,
+    send: SEND,
+    delete: DELETE,
+    edit: EDIT
 };
 
 /** Добавляем красивостей к сообщению
@@ -51,7 +51,7 @@ function paintCommands(message, isVerbose) {
  * @param {Array} args
  * @returns {Promise}
  */
-function listFunc(args) {
+function LIST(args) {
     var options = {
         uri: 'http://localhost:8080/messages/',
         qs: { from: args.from, to: args.to },
@@ -69,7 +69,7 @@ function listFunc(args) {
  * @param {Array} args
  * @returns {Promise}
  */
-function sendFunc(args) {
+function SEND(args) {
     var options = {
         uri: 'http://localhost:8080/messages/',
         qs: { from: args.from, to: args.to },
@@ -85,7 +85,7 @@ function sendFunc(args) {
  * @param {Array} args
  * @returns {Promise}
  */
-function deleteFunc(args) {
+function DELETE(args) {
     var options = {
         uri: 'http://localhost:8080/messages/:' + toString(args.id),
         qs: { id: args.id },
@@ -100,7 +100,7 @@ function deleteFunc(args) {
  * @param {Array} args
  * @returns {Promise}
  */
-function editFunc(args) {
+function EDIT(args) {
     var options = {
         uri: 'http://localhost:8080/messages/:' + toString(args.id),
         method: 'PATCH',
