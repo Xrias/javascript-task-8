@@ -12,7 +12,7 @@ const commands = {
 };
 
 let messages = [];
-let id = 0;
+let id = 1;
 
 /** Выбираем фильтр по сообщениям
  * @param {Array} data
@@ -85,7 +85,7 @@ function PATCH(req, res, data) {
     });
     req.on('end', () => {
         let messageForEdit = messages.find(message => message.id === Number(data.id));
-        if (messageForEdit && text) {
+        if (messageForEdit) {
             messageForEdit.text = JSON.parse(text).text;
             messageForEdit.edited = true;
             let note = prepareMessageToSend(messageForEdit, text);
