@@ -104,7 +104,7 @@ server.on('request', (req, res) => {
     let data = queryapi.parse(query);
     res.setHeader('content-type', 'application/json');
     var regexp = /^\/messages\/{0,2}$/;
-    if (req.method === 'DELETE') {
+    if (req.method === 'DELETE' || req.method === 'PATCH') {
         res.statusCode = 404;
         res.end();
     }
