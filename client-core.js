@@ -93,7 +93,7 @@ function DELETE(args) {
     };
 
     return requestPromise(options)
-        .then(() => 'DELETED', err => console.error(err));
+        .then(() => 'DELETE', err => console.error(err));
 }
 
 /** Редактируем сообщение
