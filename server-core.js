@@ -4,6 +4,12 @@ const http = require('http');
 const server = http.createServer();
 const urlapi = require('url');
 const queryapi = require('querystring');
+const commands = {
+    GET: getFunc,
+    POST: postFunc,
+    DELETE: deleteFunc,
+    PATCH: patchFunc
+};
 
 let messages = [];
 
@@ -45,55 +51,62 @@ function prepareMessageToSend(from, to, text) {
     return note;
 }
 
-function getFunc(res, from, to) {
-    res.write(JSON.stringify(messages.filter(queryCheck(from, to))));
+function getFunc(req, res, data) {
+    res.write(JSON.stringify(messages.filter(queryCheck(data.from, data.to))));
     res.end();
 }
 
-function postFunc(req, res, from, to) {
+function postFunc(req, res, data) {
     let text = '';
     req.on('data', partOfText => {
         text += partOfText;
     });
     req.on('end', () => {
-        let note = prepareMessageToSend(from, to, text);
+        let note = prepareMessageToSend(data.from, data.to, text);
         messages.push(note);
         res.write(JSON.stringify(note));
         res.end();
     });
 }
 
-function deleteFunc(req, res, from, to) {
+function deleteFunc(req, res, data) {
+    messages = messages.filter(message => message.id !== data.id);
+    res.statusCode = 'ok';
+    res.end();
+}
+
+function patchFunc(req, res, data) {
+    messages.map(function (message) {
+        if (message.id === data.id) {
+            return {};
+        }
+
+        return message;
+    });
     let text = '';
     req.on('data', partOfText => {
         text += partOfText;
     });
     req.on('end', () => {
-        let note = prepareMessageToSend(from, to, text);
+        let note = prepareMessageToSend(data.from, data.to, text);
         messages.push(note);
         res.write(JSON.stringify(note));
         res.end();
     });
 }
+
 
 server.on('request', (req, res) => {
     let url = urlapi.parse(req.url);
     let query = urlapi.parse(req.url).query;
-    let { from, to } = queryapi.parse(query);
+    let data = queryapi.parse(query);
     res.setHeader('content-type', 'application/json');
-    if (url.pathname === '/messages' || url.pathname === '/messages//') {
-        switch (req.method) {
-            case 'GET':
-                getFunc(res, from, to);
-                break;
-            case 'POST':
-                postFunc(req, res, from, to);
-                break;
-            case 'DELETE':
-                deleteFunc(req, res, from, to);
-                break;
-            default:
-                break;
+    console.info(url.pathname);
+    if (url.pathname === '/messages' || url.pathname === '/messages/' ||
+        url.pathname === '/messages//') {
+        if (req.method in commands) {
+
+            return commands[req.method](req, res, data);
         }
     } else {
         res.statusCode = 404;
