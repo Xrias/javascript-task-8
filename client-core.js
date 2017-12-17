@@ -1,18 +1,16 @@
 'use strict';
 
 module.exports.execute = execute;
-module.exports.isStar = false;
+module.exports.isStar = true;
 
 const requestPromise = require('request-promise');
 
 const chalk = require('chalk');
-const red = chalk.hex('#f00');
-const green = chalk.hex('#0f0');
 
 const ArgumentParser = require('argparse').ArgumentParser;
 const parser = new ArgumentParser();
 parser.addArgument('command', {
-    choices: ['list', 'send', 'delete', 'edit']
+    chalkoices: ['list', 'send', 'delete', 'edit']
 });
 parser.addArgument('--from');
 parser.addArgument('--to');
@@ -23,19 +21,30 @@ parser.addArgument('-v');
 const commands = {
     list: listFunc,
     send: sendFunc,
-    delete: deleteFunc
+    delete: deleteFunc,
+    edit: editFunc
 };
 
 /** Добавляем красивостей к сообщению
  * @param {json} message - сообщение
+ * @param {bool} isVerbose
  * @returns {Array}
  */
-function paintCommands(message) {
-    return [
-        message.from && `${red('FROM')}: ${message.from}`,
-        message.to && `${red('TO')}: ${message.to}`,
-        `${green('TEXT')}: ${message.text}`
-    ].filter(Boolean).join('\n');
+function paintCommands(message, isVerbose) {
+    let result = [];
+    if (isVerbose) {
+        result.push(`${chalk.hex('#ff0')('ID')}: ${message.id}`);
+    }
+    if (message.from) {
+        result.push(`${chalk.hex('#f00')('FROM')}: ${message.from}`);
+    }
+    if (message.to) {
+        result.push(`${chalk.hex('#f00')('TO')}: ${message.to}`);
+    }
+    let edited = message.edited ? chalk.hex('#777')('(edited)') : '';
+    result.push(`${chalk.hex('#0f0')('TEXT')}: ${message.text}${edited}`);
+
+    return result.join('\n');
 }
 
 /** Получаем список сообщений
@@ -44,7 +53,7 @@ function paintCommands(message) {
  */
 function listFunc(args) {
     var options = {
-        uri: 'http://localhost:8080/messages//',
+        uri: 'http://localhost:8080/messages/',
         qs: { from: args.from, to: args.to },
         method: 'GET',
         json: true
@@ -62,7 +71,7 @@ function listFunc(args) {
  */
 function sendFunc(args) {
     var options = {
-        uri: 'http://localhost:8080/messages//',
+        uri: 'http://localhost:8080/messages/',
         qs: { from: args.from, to: args.to },
         method: 'POST',
         json: { text: args.text }
@@ -72,20 +81,34 @@ function sendFunc(args) {
         .then(message => paintCommands(message), err => console.error(err));
 }
 
-/** Отправляем сообщение
+/** Удаляем сообщение
  * @param {Array} args
  * @returns {Promise}
  */
 function deleteFunc(args) {
     var options = {
-        uri: 'http://localhost:8080/messages//',
-        qs: { from: args.from, to: args.to },
-        method: 'POST',
+        uri: 'http://localhost:8080/messages/:' + toString(args.id),
+        qs: { id: args.id },
+        method: 'DELETE'
+    };
+
+    return requestPromise(options)
+        .then(() => 'DELETED', err => console.error(err));
+}
+
+/** Редактируем сообщение
+ * @param {Array} args
+ * @returns {Promise}
+ */
+function editFunc(args) {
+    var options = {
+        uri: 'http://localhost:8080/messages/:' + toString(args.id),
+        method: 'PATCH',
         json: { text: args.text }
     };
 
     return requestPromise(options)
-        .then(message => paintCommands(message), err => console.error(err));
+        .then(message => paintCommands(message, args.v), err => console.error(err));
 }
 
 /**
