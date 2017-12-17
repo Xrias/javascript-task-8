@@ -109,7 +109,7 @@ function EDIT(args) {
     };
 
     return requestPromise(options)
-        .then(message => paintCommands(message, args.v), err => console.error(err));
+        .then(message => console.info(message, args.v), err => console.error(err));
 }
 
 /**
