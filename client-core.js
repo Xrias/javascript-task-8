@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports.execute = execute;
-module.exports.isStar = true
+module.exports.isStar = true;
 
 const requestPromise = require('request-promise');
 
