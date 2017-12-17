@@ -73,9 +73,15 @@ function POST(req, res, data) {
 }
 
 function DELETE(req, res, data) {
-    messages = messages.filter(message => message.id !== Number(data.id));
-    res.write(JSON.stringify({ 'status': 'ok' }));
-    res.end();
+    let messageForDelete = messages.find(message => message.id === Number(data.id));
+    if (messageForDelete) {
+        messages = messages.filter(message => message.id !== Number(data.id));
+        res.write(JSON.stringify({ 'status': 'ok' }));
+        res.end();
+    } else {
+        res.statusCode = 404;
+        res.end();
+    }
 }
 
 function PATCH(req, res, data) {
@@ -85,15 +91,12 @@ function PATCH(req, res, data) {
     });
     req.on('end', () => {
         let messageForEdit = messages.find(message => message.id === Number(data.id));
-        if (messageForEdit && JSON.parse(text).text !== null) {
+        if (messageForEdit) {
             messageForEdit.text = JSON.parse(text).text;
             messageForEdit.edited = true;
             let note = prepareMessageToSend(messageForEdit, text);
             note.id = Number(data.id);
             res.write(JSON.stringify(note));
-            res.end();
-        } else {
-            res.write(JSON.stringify({}));
             res.end();
         }
         res.statusCode = 404;
