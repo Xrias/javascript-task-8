@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports.execute = execute;
-module.exports.isStar = false;
+module.exports.isStar = true;
 
 const requestPromise = require('request-promise');
 
@@ -10,7 +10,7 @@ const chalk = require('chalk');
 const ArgumentParser = require('argparse').ArgumentParser;
 const parser = new ArgumentParser();
 parser.addArgument('command', {
-    chalkoices: ['list', 'send', 'delete', 'edit']
+    choices: ['list', 'send', 'delete', 'edit']
 });
 parser.addArgument('--from');
 parser.addArgument('--to');
@@ -60,7 +60,7 @@ function listFunc(args) {
     };
 
     return requestPromise(options)
-        .then(messages => messages.map(message => paintCommands(message)),
+        .then(messages => messages.map(message => paintCommands(message, args.v)),
             err => console.error(err))
         .then(messages => messages.join('\n\n'), err => console.error(err));
 }
@@ -78,10 +78,10 @@ function sendFunc(args) {
     };
 
     return requestPromise(options)
-        .then(message => paintCommands(message), err => console.error(err));
+        .then(message => paintCommands(message, args.v), err => console.error(err));
 }
 
-/** Удаляем сообщение
+/** Удаляем сообщение (не доделано)
  * @param {Array} args
  * @returns {Promise}
  */
@@ -96,7 +96,7 @@ function deleteFunc(args) {
         .then(() => 'DELETED', err => console.error(err));
 }
 
-/** Редактируем сообщение
+/** Редактируем сообщение (не доделано)
  * @param {Array} args
  * @returns {Promise}
  */
@@ -104,6 +104,7 @@ function editFunc(args) {
     var options = {
         uri: 'http://localhost:8080/messages/:' + toString(args.id),
         method: 'PATCH',
+        qs: { id: args.id },
         json: { text: args.text }
     };
 
