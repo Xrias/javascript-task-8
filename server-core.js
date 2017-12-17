@@ -77,15 +77,10 @@ function deleteFunc(req, res, from, to) {
 }
 
 server.on('request', (req, res) => {
-    const parsedUrl = urlapi.parse(req.url, true);
     let query = urlapi.parse(req.url).query;
     let { from, to } = queryapi.parse(query);
     res.setHeader('content-type', 'application/json');
-    if (!/^\/messages$/.test(parsedUrl.pathname)) {
-        res.writeHead(404);
 
-        return res.end();
-    }
     switch (req.method) {
         case 'GET':
             getFunc(res, from, to);
