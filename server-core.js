@@ -49,7 +49,6 @@ function prepareMessageToSend(data, text) {
         note.edited = data.edited;
     }
     note.text = JSON.parse(text).text;
-    note.id = id++;
 
     return note;
 }
@@ -66,6 +65,7 @@ function POST(req, res, data) {
     });
     req.on('end', () => {
         let note = prepareMessageToSend(data, text);
+        note.id = id++;
         messages.push(note);
         res.write(JSON.stringify(note));
         res.end();
@@ -84,14 +84,14 @@ function PATCH(req, res, data) {
         text += partOfText;
     });
     req.on('end', () => {
-        for (let message of messages) {
-            if (message.id === Number(data.id)) {
-                message.text = JSON.parse(text).text;
-                message.edited = true;
-                let note = prepareMessageToSend(message, text);
-                res.write(JSON.stringify(note));
-                res.end();
-            }
+        let messageForEdit = messages.find(message => message.id === Number(data.id));
+        if (messageForEdit) {
+            messageForEdit.text = JSON.parse(text).text;
+            messageForEdit.edited = true;
+            let note = prepareMessageToSend(messageForEdit, text);
+            note.id = Number(data.id);
+            res.write(JSON.stringify(note));
+            res.end();
         }
         res.statusCode = 404;
         res.end();
