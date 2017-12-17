@@ -60,7 +60,7 @@ function LIST(args) {
     };
 
     return requestPromise(options)
-        .then(messages => messages.map(message => paintCommands(message)),
+        .then(messages => messages.map(message => paintCommands(message, args.v)),
             err => console.error(err))
         .then(messages => messages.join('\n\n'), err => console.error(err));
 }
@@ -78,7 +78,7 @@ function SEND(args) {
     };
 
     return requestPromise(options)
-        .then(message => paintCommands(message), err => console.error(err));
+        .then(message => paintCommands(message, args.v), err => console.error(err));
 }
 
 /** Удаляем сообщение
@@ -109,7 +109,7 @@ function EDIT(args) {
     };
 
     return requestPromise(options)
-        .then(message => paintCommands(message), err => console.error(err));
+        .then(message => paintCommands(message, args.v), err => console.error(err));
 }
 
 /**
