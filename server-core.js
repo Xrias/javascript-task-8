@@ -104,7 +104,7 @@ server.on('request', (req, res) => {
     let data = queryapi.parse(query);
     res.setHeader('content-type', 'application/json');
     if (url.pathname === '/messages' || url.pathname === '/messages/' ||
-        url.pathname === '/messages//' || '/messages/:[object%20Undefined]') {
+        url.pathname === '/messages//' || url.pathname === '/messages/:[object%20Undefined]') {
         if (req.method in commands) {
 
             return commands[req.method](req, res, data);
