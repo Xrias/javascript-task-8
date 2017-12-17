@@ -12,47 +12,50 @@ const commands = {
 };
 
 let messages = [];
+let id = 0;
 
 /** Выбираем фильтр по сообщениям
- * @param {string} from
- * @param {string} to
+ * @param {Array} data
  * @returns {Object}
  */
-function queryCheck(from, to) {
-    if (from && to) {
-        return (note) => note.from === from && note.to === to;
+function queryCheck(data) {
+    if (data.from && data.to) {
+        return (note) => note.from === data.from && note.to === data.to;
     }
-    if (from) {
-        return (note) => note.from === from;
+    if (data.from) {
+        return (note) => note.from === data.from;
     }
-    if (to) {
-        return (note) => note.to === to;
+    if (data.to) {
+        return (note) => note.to === data.to;
     }
 
     return () => true;
 }
 
 /** Собираем сообщение
- * @param {string} from
- * @param {string} to
+ * @param {Array} data
  * @param {string} text
  * @returns {Object}
  */
-function prepareMessageToSend(from, to, text) {
+function prepareMessageToSend(data, text) {
     let note = {};
-    if (from) {
-        note.from = from;
+    if (data.from) {
+        note.from = data.from;
     }
-    if (to) {
-        note.to = to;
+    if (data.to) {
+        note.to = data.to;
+    }
+    if (data.edited) {
+        note.edited = data.edited;
     }
     note.text = JSON.parse(text).text;
+    note.id = id++;
 
     return note;
 }
 
 function getFunc(req, res, data) {
-    res.write(JSON.stringify(messages.filter(queryCheck(data.from, data.to))));
+    res.write(JSON.stringify(messages.filter(queryCheck(data))));
     res.end();
 }
 
@@ -62,7 +65,7 @@ function postFunc(req, res, data) {
         text += partOfText;
     });
     req.on('end', () => {
-        let note = prepareMessageToSend(data.from, data.to, text);
+        let note = prepareMessageToSend(data, text);
         messages.push(note);
         res.write(JSON.stringify(note));
         res.end();
@@ -70,40 +73,36 @@ function postFunc(req, res, data) {
 }
 
 function deleteFunc(req, res, data) {
-    messages = messages.filter(message => message.id !== data.id);
-    res.statusCode = 'ok';
+    messages = messages.filter(message => message.id !== Number(data.id));
+    res.write(JSON.stringify({ 'status': 'ok' }));
     res.end();
 }
 
 function patchFunc(req, res, data) {
-    messages.map(function (message) {
-        if (message.id === data.id) {
-            return {};
-        }
-
-        return message;
-    });
     let text = '';
     req.on('data', partOfText => {
         text += partOfText;
     });
     req.on('end', () => {
-        let note = prepareMessageToSend(data.from, data.to, text);
-        messages.push(note);
-        res.write(JSON.stringify(note));
+        for (let message of messages) {
+            if (message.id === Number(data.id)) {
+                message.text = JSON.parse(text).text;
+                message.edited = true;
+                let note = prepareMessageToSend(message, text);
+                res.write(JSON.stringify(note));
+            }
+        }
         res.end();
     });
 }
-
 
 server.on('request', (req, res) => {
     let url = urlapi.parse(req.url);
     let query = urlapi.parse(req.url).query;
     let data = queryapi.parse(query);
     res.setHeader('content-type', 'application/json');
-    console.info(url.pathname);
     if (url.pathname === '/messages' || url.pathname === '/messages/' ||
-        url.pathname === '/messages//') {
+        url.pathname === '/messages//' || '/messages/:[object%20Undefined]') {
         if (req.method in commands) {
 
             return commands[req.method](req, res, data);
