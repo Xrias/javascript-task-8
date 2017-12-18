@@ -112,9 +112,7 @@ server.on('request', (req, res) => {
     let data = queryapi.parse(query);
     res.setHeader('content-type', 'application/json');
     var regexp = /^\/messages\/{0,2}$/;
-    if (regexp.test(url.pathname) || url.pathname === '/messages/:[object%20Undefined]' ||
-    url.pathname === '/messages:[object%20Undefined]' ||
-    url.pathname === '/messages//:[object%20Undefined]') {
+    if (regexp.test(url.pathname)) {
         if (req.method in commands) {
 
             return commands[req.method](req, res, data);
