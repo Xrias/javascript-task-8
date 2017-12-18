@@ -105,7 +105,7 @@ server.on('request', (req, res) => {
     let query = urlapi.parse(req.url).query;
     let data = queryapi.parse(query);
     res.setHeader('content-type', 'application/json');
-    if (url.pathname.startsWith('/messages/')) {
+    if (url.pathname.startsWith('/messages')) {
         if (req.method === 'GET') {
             get(req, res, data);
         }
