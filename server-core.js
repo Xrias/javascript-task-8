@@ -84,6 +84,30 @@ function del(req, res, url) {
     }
 }
 
+function patch(req, res, data, url) {
+    let msgId = extractIdFromUrl(url);
+    let text = '';
+    req.on('data', partOfText => {
+        text += partOfText;
+    });
+    req.on('end', () => {
+        let messageForEdit = messages.find(message => message.id === Number(msgId));
+        if (messageForEdit) {
+            if (JSON.parse(text).text) {
+                messageForEdit.text = JSON.parse(text).text;
+                messageForEdit.edited = true;
+                res.write(JSON.stringify(messageForEdit));
+                res.end();
+            } else {
+                res.statusCode = 404;
+                res.end();
+            }
+        }
+        res.statusCode = 404;
+        res.end();
+    });
+}
+
 server.on('request', (req, res) => {
     let url = urlapi.parse(req.url);
     let query = urlapi.parse(req.url).query;
@@ -100,7 +124,7 @@ server.on('request', (req, res) => {
             del(req, res, url.pathname);
         }
         if (req.method === 'PATCH') {
-            post(req, res);
+            patch(req, res, data, url.pathname);
         }
     } else {
         res.statusCode = 404;
