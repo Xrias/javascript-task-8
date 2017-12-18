@@ -76,8 +76,7 @@ function DELETE(req, res, data) {
     let messageForDelete = messages.find(message => message.id === Number(data.id));
     if (messageForDelete) {
         messages = messages.filter(message => message.id !== Number(data.id));
-        res.write(JSON.stringify({ 'status': 'ok' }));
-        res.end();
+        res.end(JSON.stringify({ status: 'ok' }));
     } else {
         res.statusCode = 404;
         res.end();
