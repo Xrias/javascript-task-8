@@ -91,7 +91,6 @@ function PATCH(req, res, data) {
     req.on('end', () => {
         let messageForEdit = messages.find(message => message.id === Number(data.id));
         if (messageForEdit) {
-            console.info(JSON.parse(text).text);
             if (JSON.parse(text).text) {
                 messageForEdit.text = JSON.parse(text).text;
                 messageForEdit.edited = true;
@@ -113,7 +112,9 @@ server.on('request', (req, res) => {
     let data = queryapi.parse(query);
     res.setHeader('content-type', 'application/json');
     var regexp = /^\/messages\/{0,2}$/;
-    if (regexp.test(url.pathname) || url.pathname === '/messages/:[object%20Undefined]') {
+    if (regexp.test(url.pathname) || url.pathname === '/messages/:[object%20Undefined]' ||
+    url.pathname === '/messages:[object%20Undefined]' ||
+    url.pathname === '/messages//:[object%20Undefined]') {
         if (req.method in commands) {
 
             return commands[req.method](req, res, data);
