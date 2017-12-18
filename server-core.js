@@ -4,6 +4,12 @@ const http = require('http');
 const server = http.createServer();
 const urlapi = require('url');
 const queryapi = require('querystring');
+const commands = {
+    GET: get,
+    POST: post,
+    DELETE: del,
+    PATCH: patch
+};
 
 let messages = [];
 let id = 1;
@@ -72,7 +78,7 @@ function extractIdFromUrl(sourceUrl) {
     return splitedUrl[splitedUrl.length - 1];
 }
 
-function del(req, res, url) {
+function del(req, res, data, url) {
     let msgId = extractIdFromUrl(url);
     let messageForDelete = messages.find(message => message.id === Number(msgId));
     if (messageForDelete) {
@@ -113,18 +119,11 @@ server.on('request', (req, res) => {
     let query = urlapi.parse(req.url).query;
     let data = queryapi.parse(query);
     res.setHeader('content-type', 'application/json');
-    if (url.pathname.startsWith('/messages')) {
-        if (req.method === 'GET') {
-            get(req, res, data);
-        }
-        if (req.method === 'POST') {
-            post(req, res, data);
-        }
-        if (req.method === 'DELETE') {
-            del(req, res, url.pathname);
-        }
-        if (req.method === 'PATCH') {
-            patch(req, res, data, url.pathname);
+    var regexp = /^\/messages\/{0,2}$/;
+    if (regexp.test(url.pathname) || url.pathname === '/messages/:[object%20Undefined]') {
+        if (req.method in commands) {
+
+            return commands[req.method](req, res, data);
         }
     } else {
         res.statusCode = 404;
