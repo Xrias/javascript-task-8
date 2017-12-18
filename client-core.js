@@ -87,7 +87,7 @@ function SEND(args) {
  */
 function DELETE(args) {
     var options = {
-        uri: 'http://localhost:8080/messages/' + args.id,
+        uri: 'http://localhost:8080/messages/:' + args.id,
         qs: { id: args.id },
         method: 'DELETE'
     };
@@ -102,7 +102,7 @@ function DELETE(args) {
  */
 function EDIT(args) {
     var options = {
-        uri: 'http://localhost:8080/messages/' + args.id,
+        uri: 'http://localhost:8080/messages/:' + args.id,
         method: 'PATCH',
         qs: { id: args.id },
         json: { text: args.text }
