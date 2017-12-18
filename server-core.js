@@ -111,7 +111,8 @@ server.on('request', (req, res) => {
     let query = urlapi.parse(req.url).query;
     let data = queryapi.parse(query);
     res.setHeader('content-type', 'application/json');
-    if (((req.method === 'GET' || req.method === 'POST') && url.pathname === '/messages') ||
+    var regexp = /^\/messages\/{0,2}$/;
+    if (((req.method === 'GET' || req.method === 'POST') && regexp.test(url.pathname)) ||
           req.method === 'DELETE' || req.method === 'PATCH') {
         if (req.method in commands) {
 
