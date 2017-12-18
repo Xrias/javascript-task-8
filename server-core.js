@@ -66,6 +66,47 @@ function post(req, res, data) {
     });
 }
 
+function extractIdFromUrl(sourceUrl) {
+    let splitedUrl = sourceUrl.split('/');
+
+    return splitedUrl[splitedUrl.length - 1];
+}
+
+function del(req, res) {
+    let msgId = extractIdFromUrl(req.url.pathname);
+    let messageForDelete = messages.find(message => message.id === Number(msgId));
+    if (messageForDelete) {
+        messages = messages.filter(message => message.id !== Number(msgId));
+        res.end(JSON.stringify({ status: 'ok' }));
+    } else {
+        res.statusCode = 404;
+        res.end();
+    }
+}
+
+function patch(req, res, data) {
+    let text = '';
+    req.on('data', partOfText => {
+        text += partOfText;
+    });
+    req.on('end', () => {
+        let messageForEdit = messages.find(message => message.id === Number(data.id));
+        if (messageForEdit) {
+            if (JSON.parse(text).text) {
+                messageForEdit.text = JSON.parse(text).text;
+                messageForEdit.edited = true;
+                res.write(JSON.stringify(messageForEdit));
+                res.end();
+            } else {
+                res.statusCode = 404;
+                res.end();
+            }
+        }
+        res.statusCode = 404;
+        res.end();
+    });
+}
+
 server.on('request', (req, res) => {
     let url = urlapi.parse(req.url);
     let query = urlapi.parse(req.url).query;
@@ -79,7 +120,7 @@ server.on('request', (req, res) => {
             post(req, res, data);
         }
         if (req.method === 'DELETE') {
-            post(req, res, data);
+            del(req, res, data);
         }
         if (req.method === 'PATCH') {
             post(req, res, data);
