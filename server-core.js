@@ -4,12 +4,6 @@ const http = require('http');
 const server = http.createServer();
 const urlapi = require('url');
 const queryapi = require('querystring');
-const commands = {
-    GET: GET,
-    POST: POST,
-    DELETE: DELETE,
-    PATCH: PATCH
-};
 
 let messages = [];
 let id = 1;
@@ -53,12 +47,12 @@ function prepareMessageToSend(data, text) {
     return note;
 }
 
-function GET(req, res, data) {
+function get(req, res, data) {
     res.write(JSON.stringify(messages.filter(queryCheck(data))));
     res.end();
 }
 
-function POST(req, res, data) {
+function post(req, res, data) {
     let text = '';
     req.on('data', partOfText => {
         text += partOfText;
@@ -72,7 +66,7 @@ function POST(req, res, data) {
     });
 }
 
-function DELETE(req, res, data) {
+function del(req, res, data) {
     let messageForDelete = messages.find(message => message.id === Number(data.id));
     if (messageForDelete) {
         messages = messages.filter(message => message.id !== Number(data.id));
@@ -83,7 +77,7 @@ function DELETE(req, res, data) {
     }
 }
 
-function PATCH(req, res, data) {
+function patch(req, res, data) {
     let text = '';
     req.on('data', partOfText => {
         text += partOfText;
@@ -111,13 +105,18 @@ server.on('request', (req, res) => {
     let query = urlapi.parse(req.url).query;
     let data = queryapi.parse(query);
     res.setHeader('content-type', 'application/json');
-    var regexp = /^\/messages\/{0,2}$/;
-    var regexp2 = /^\/messages\/\d$/;
-    console.info(url);
-    if (regexp.test(url.pathname) || regexp2.test(url.pathname)) {
-        if (req.method in commands) {
-
-            return commands[req.method](req, res, data);
+    if (url.pathname.startsWith('/messages/')) {
+        if (req.method === 'GET') {
+            get(req, res, data);
+        }
+        if (req.method === 'POST') {
+            post(req, res, data);
+        }
+        if (req.method === 'DELETE') {
+            del(req, res, data);
+        }
+        if (req.method === 'PATCH') {
+            patch(req, res, data);
         }
     } else {
         res.statusCode = 404;
